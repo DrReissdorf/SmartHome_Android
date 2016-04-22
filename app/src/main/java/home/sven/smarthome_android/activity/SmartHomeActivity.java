@@ -2,8 +2,8 @@ package home.sven.smarthome_android.activity;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.content.SharedPreferences;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -14,11 +14,35 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Switch;
+
+import java.io.IOException;
+import java.util.ArrayList;
 
 import home.sven.smarthome_android.fragment.MainMenuFragment;
 import home.sven.smarthome_android.R;
+import home.sven.smarthome_android.fragment.RelaisFragment;
+import home.sven.smarthome_android.fragment.TemperatureFragment;
+import home.sven.smarthome_android.singleton.CommunicationHandler;
 
 public class SmartHomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+    private final Context context = this;
+    private final int UPDATE_SWITCH_SLEEP = 250; // update switches every xxxx ms
+
+    /******************* Variables for View generation *******************/
+    private int margins_switches_leftright;
+    private int margins_switches_topbottom;
+    private int textsize;
+    /*********************************************************************/
+
+    private ArrayList<Switch> switchesArrayList;
+    private String serverIP;
+    private String currentInfo;
+    private String lastInfo = "";
+
+    /****************** Threads *********************/
+    private CommunicationHandler communicationHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,11 +60,32 @@ public class SmartHomeActivity extends AppCompatActivity implements NavigationVi
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        communicationHandler = CommunicationHandler.getInstance();
+
         /***** Set first fragment to show *****/
         switchFragment(R.id.fragment_container, new MainMenuFragment());
     }
 
-/*    @Override
+    public void onResume() {
+        super.onResume();
+        Log.v("Relay - Menu Activity", "onResume()");
+
+        if(!communicationHandler.connect(serverIP)) {
+            /** Connection didn't happen, back to MainActivity **/
+            Intent intent = new Intent(context,MainActivity.class);
+            Bundle mBundle = new Bundle();
+            mBundle.putString("server_down_window", "true");
+            intent.putExtras(mBundle);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            communicationHandler.close();
+            context.startActivity(intent);
+            finish();
+        }
+
+        communicationHandler.startUpdateStatusThread();
+    }
+
+    @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -48,7 +93,7 @@ public class SmartHomeActivity extends AppCompatActivity implements NavigationVi
         } else {
             super.onBackPressed();
         }
-    } */
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -87,12 +132,12 @@ public class SmartHomeActivity extends AppCompatActivity implements NavigationVi
 
             case R.id.relais:
                 Log.v("MainActivity","onNavigationItemSelected() - Clicked Navitem: Relais");
-                //switchFragment(R.id.fragment_container, new WeekOverviewFragment());
+                switchFragment(R.id.fragment_container, new RelaisFragment());
                 break;
 
             case R.id.temp:
                 Log.v("MainActivity","onNavigationItemSelected() - Clicked Navitem: Temp");
-                //switchFragment(R.id.fragment_container, new FoodFragment());
+                switchFragment(R.id.fragment_container, new TemperatureFragment());
                 break;
         }
 
