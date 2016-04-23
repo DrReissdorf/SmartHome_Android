@@ -14,10 +14,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Switch;
-
-import java.io.IOException;
-import java.util.ArrayList;
 
 import home.sven.smarthome_android.fragment.MainMenuFragment;
 import home.sven.smarthome_android.R;
@@ -27,21 +23,11 @@ import home.sven.smarthome_android.singleton.CommunicationHandler;
 
 public class SmartHomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private final Context context = this;
-    private final int UPDATE_SWITCH_SLEEP = 250; // update switches every xxxx ms
-
-    /******************* Variables for View generation *******************/
-    private int margins_switches_leftright;
-    private int margins_switches_topbottom;
-    private int textsize;
-    /*********************************************************************/
-
-    private ArrayList<Switch> switchesArrayList;
     private String serverIP;
-    private String currentInfo;
-    private String lastInfo = "";
 
     /****************** Threads *********************/
     private CommunicationHandler communicationHandler;
+    private RelaisFragment relaisFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +47,7 @@ public class SmartHomeActivity extends AppCompatActivity implements NavigationVi
         navigationView.setNavigationItemSelectedListener(this);
 
         communicationHandler = CommunicationHandler.getInstance();
+        serverIP = getIntent().getExtras().getString("ip");
 
         /***** Set first fragment to show *****/
         switchFragment(R.id.fragment_container, new MainMenuFragment());
@@ -82,7 +69,17 @@ public class SmartHomeActivity extends AppCompatActivity implements NavigationVi
             finish();
         }
 
+        if(relaisFragment != null) relaisFragment.startThread();
+
         communicationHandler.startUpdateStatusThread();
+    }
+
+    public void onPause() {
+        Log.v("Relay - Menu Activity", "onPause()");
+        super.onPause();
+
+        if(relaisFragment != null) relaisFragment.stopThread();
+        communicationHandler.close();
     }
 
     @Override
@@ -120,9 +117,10 @@ public class SmartHomeActivity extends AppCompatActivity implements NavigationVi
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-
         int id = item.getItemId();
+
+        if(relaisFragment != null) relaisFragment.stopThread();
+        relaisFragment = null;
 
         switch(id) {
             case R.id.main_menu:
@@ -132,7 +130,8 @@ public class SmartHomeActivity extends AppCompatActivity implements NavigationVi
 
             case R.id.relais:
                 Log.v("MainActivity","onNavigationItemSelected() - Clicked Navitem: Relais");
-                switchFragment(R.id.fragment_container, new RelaisFragment());
+                relaisFragment = new RelaisFragment();
+                switchFragment(R.id.fragment_container, relaisFragment );
                 break;
 
             case R.id.temp:
