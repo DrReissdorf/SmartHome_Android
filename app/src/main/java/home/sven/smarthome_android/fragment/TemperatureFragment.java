@@ -2,20 +2,67 @@ package home.sven.smarthome_android.fragment;
 
 import android.app.Fragment;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Switch;
+import android.widget.TextView;
+
+import java.io.IOException;
+import java.text.DecimalFormat;
 
 import home.sven.smarthome_android.R;
+import home.sven.smarthome_android.singleton.CommunicationHandler;
 
 public class TemperatureFragment extends Fragment {
+    private CommunicationHandler communicationHandler;
+    private TextView textView0;
+    private Button refreshButton;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         //FloatingActionButton fab = (FloatingActionButton)((MainActivity)getActivity()).findViewById(R.id.fab);
         //fab.setVisibility(View.GONE);
         // Inflate the layout for this fragment
+        communicationHandler = CommunicationHandler.getInstance();
+
         return inflater.inflate(R.layout.fragment_temperature, container, false);
+    }
+
+    public void onActivityCreated (Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Log.v("SmartHome", "onActivityCreated()");
+
+        while(communicationHandler.getCurrentTempStatus() == null) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        refreshButton = (Button) getView().findViewById(R.id.refreshButton);
+        refreshButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateTemperatures();
+            }
+        });
+
+        updateTemperatures();
+    }
+
+    private void updateTemperatures() {
+        String[] tempInfo = communicationHandler.getCurrentTempStatus().split(";");
+
+        textView0 = (TextView) getView().findViewById(R.id.tempText0);
+        textView0.setText("Temperatur: "+getRoundedTemperature(tempInfo[0])+"°C");
+    }
+
+    private String getRoundedTemperature(String temp) {
+        return String.valueOf(Math.round(Float.valueOf(temp)/1000));
     }
 }

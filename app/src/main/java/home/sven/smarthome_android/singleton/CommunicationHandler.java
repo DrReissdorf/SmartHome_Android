@@ -10,8 +10,11 @@ import home.sven.smarthome_android.socket.SocketComm;
 public class CommunicationHandler {
     private static CommunicationHandler communicationHandler;
     private final int TCP_COMMAND_PORT = 18745;
-    private String currentStatus;
+    private String currentSwitchStatus;
+    private String currentTempStatus;
     private SocketComm commandSocketComm;
+    private final int UPDATE_TEMPERATURE_SLEEP = 2500;
+    private UpdateTemperatureThread updateTemperatureThread;
 
     private CommunicationHandler(){}
 
@@ -23,11 +26,6 @@ public class CommunicationHandler {
     public void sendCommand(String message) throws IOException {
         Log.v("CommunicationHandler", "sendCommand()");
         commandSocketComm.send(message);
-    }
-
-    public void updateStatus() throws IOException {
-        Log.v("CommunicationHandler", "updateStatus()");
-        currentStatus = commandSocketComm.receive();
     }
 
     public boolean connect(String ip) {
@@ -46,9 +44,14 @@ public class CommunicationHandler {
     public void startUpdateStatusThread() {
         new UpdateStatusThread().start();
     }
+    public void startUpdateTemperatureThread() {
+        updateTemperatureThread = new UpdateTemperatureThread();
+        updateTemperatureThread.start();
+    }
 
     public boolean close() {
         Log.v("CommunicationHandler", "close()");
+        updateTemperatureThread.exit();
         try {
             return new CloseSocketsTask().execute().get();
         } catch (InterruptedException e) {
@@ -100,10 +103,29 @@ public class CommunicationHandler {
         public void run() {
             while(!exit) {
                 try {
-                    if(commandSocketComm != null) updateStatus();
-                    if(currentStatus == null) exit = true;
+                    if(commandSocketComm != null) {
+                        String message = commandSocketComm.receive();
+                        String[] received = message.split("%");
+
+                        System.out.println("message: "+message);
+
+                        switch(received[0]) {
+                            case "relay":
+                                Log.v("Smart Home", "UpdateStatusThread - relay");
+                                currentSwitchStatus = received[1];
+                                System.out.println(received[1]);
+                                break;
+
+                            case "temp":
+                                Log.v("Smart Home", "UpdateStatusThread - temp");
+                                currentTempStatus = received[1];
+                                break;
+                        }
+
+                    }
+                    if(currentSwitchStatus == null) exit = true;
                 } catch (IOException e) {
-                    exit = true;
+                    this.exit = true;
                     close();
                     e.printStackTrace();
                 }
@@ -112,7 +134,30 @@ public class CommunicationHandler {
         }
     }
 
-    public String getCurrentStatus() {
-        return currentStatus;
+    private class UpdateTemperatureThread extends Thread {
+        private boolean exit = false;
+        public void run() {
+            while(!exit) {
+                try {
+                    sendCommand("temp%");
+                    sleep(UPDATE_TEMPERATURE_SLEEP);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            Log.v("UpdateStatusThread", "stopping...");
+        }
+
+        public void exit() {
+           this.exit = true;
+        }
+    }
+
+    public String getCurrentSwitchStatus() {
+        return currentSwitchStatus;
+    }
+
+    public String getCurrentTempStatus() {
+        return currentTempStatus;
     }
 }

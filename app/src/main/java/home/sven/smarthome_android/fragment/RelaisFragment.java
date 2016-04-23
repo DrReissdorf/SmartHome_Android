@@ -15,7 +15,7 @@ import home.sven.smarthome_android.activity.MainActivity;
 import home.sven.smarthome_android.singleton.CommunicationHandler;
 
 public class RelaisFragment extends Fragment {
-    private final int UPDATE_SWITCH_SLEEP = 250; // update switches every xxxx ms
+    private final int UPDATE_SWITCH_SLEEP = 500; // update switches every xxxx ms
     private CommunicationHandler communicationHandler;
     private Switch[] switches = new Switch[8];
     private String currentInfo;
@@ -48,13 +48,13 @@ public class RelaisFragment extends Fragment {
         switches[6] = (Switch)getView().findViewById(R.id.switch6);
         switches[7] = (Switch)getView().findViewById(R.id.switch7);
 
-        while(communicationHandler.getCurrentStatus() == null) try {
+        while(communicationHandler.getCurrentSwitchStatus() == null) try {
             Thread.sleep(50);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        initView(communicationHandler.getCurrentStatus().split(";"));
+        initView(communicationHandler.getCurrentSwitchStatus().split(";"));
 
         startThread();
     }
@@ -96,7 +96,7 @@ public class RelaisFragment extends Fragment {
                         String switchText = ((Switch)view).getText().toString();
 
                         try {
-                            CommunicationHandler.getInstance().sendCommand("relay;"+switchText);
+                            CommunicationHandler.getInstance().sendCommand("relay%"+switchText);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -116,20 +116,20 @@ public class RelaisFragment extends Fragment {
         boolean exit = false;
 
         public void run() {
-            while (communicationHandler.getCurrentStatus() == null) {
+            while (communicationHandler.getCurrentSwitchStatus() == null) {
                 sleep(50);
             }
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    initView(communicationHandler.getCurrentStatus().split(";"));
+                    initView(communicationHandler.getCurrentSwitchStatus().split(";"));
                 }
             });
 
             while (!exit) {
                 Log.v("SmartHome", "UpdateSwitchesThread active");
                 sleep(UPDATE_SWITCH_SLEEP);
-                currentInfo = communicationHandler.getCurrentStatus();
+                currentInfo = communicationHandler.getCurrentSwitchStatus();
 
                 if(currentInfo == null) {
                     getActivity().runOnUiThread(new Runnable() {

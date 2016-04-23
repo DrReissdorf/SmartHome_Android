@@ -72,6 +72,7 @@ public class SmartHomeActivity extends AppCompatActivity implements NavigationVi
         if(relaisFragment != null) relaisFragment.startThread();
 
         communicationHandler.startUpdateStatusThread();
+        communicationHandler.startUpdateTemperatureThread();
     }
 
     public void onPause() {
