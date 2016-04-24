@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
                 Bundle mBundle = new Bundle();
                 mBundle.putString("ip", serverIP);
                 intent.putExtras(mBundle);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 context.startActivity(intent);
             } else {
                 Alerter.alertServerNotFound(context);

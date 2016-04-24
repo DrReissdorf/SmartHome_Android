@@ -21,12 +21,10 @@ public class TemperatureFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
         //FloatingActionButton fab = (FloatingActionButton)((MainActivity)getActivity()).findViewById(R.id.fab);
         //fab.setVisibility(View.GONE);
         // Inflate the layout for this fragment
         communicationHandler = CommunicationHandler.getInstance();
-
         return inflater.inflate(R.layout.fragment_temperature, container, false);
     }
 
@@ -42,39 +40,12 @@ public class TemperatureFragment extends Fragment {
             }
         }
 
-        refreshButton = (Button) getView().findViewById(R.id.refreshButton);
-        refreshButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                updateTemperatures();
-            }
-        });
-
-        updateTemperatures();
+        updateTemperatures(communicationHandler.getCurrentTempStatus());
     }
 
-    private void updateTemperatures() {
-        String received = communicationHandler.getCurrentTempStatus();
-
-
-        if(received == null) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Intent intent = new Intent(getActivity(),MainActivity.class);
-                    Bundle mBundle = new Bundle();
-                    mBundle.putString("server_down_window", "true");
-                    intent.putExtras(mBundle);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    communicationHandler.close();
-                    getActivity().startActivity(intent);
-                }
-            });
-        } else {
-            String[] tempInfo = received.split(";");
-            textView0 = (TextView) getView().findViewById(R.id.tempText0);
-            textView0.setText("Temperatur: "+getRoundedTemperature(tempInfo[0])+"°C");
-        }
+    public void updateTemperatures(String[] info) {
+        textView0 = (TextView) getView().findViewById(R.id.tempText0);
+        textView0.setText("Temperature: "+getRoundedTemperature(info[0])+"°C");
     }
 
     private String getRoundedTemperature(String temp) {

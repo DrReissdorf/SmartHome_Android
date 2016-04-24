@@ -1,26 +1,29 @@
 package home.sven.smarthome_android.singleton;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.util.Log;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
-import home.sven.smarthome_android.activity.MainActivity;
 import home.sven.smarthome_android.socket.SocketComm;
 
 public class CommunicationHandler {
     private static CommunicationHandler communicationHandler;
     private final int TCP_COMMAND_PORT = 18745;
-    private String currentSwitchStatus;
-    private String currentTempStatus;
-    private SocketComm commandSocketComm;
-    private Context smartHomeContext;
 
-    private CommunicationHandler(){}
+    private String[] currentTempStatus;
+    private SocketComm commandSocketComm;
+
+    /* SWITCHES */
+    private String[] switchNames;
+    private boolean[] switchStatus;
+    private String currentSwitchStatus;
+    private String lastSwitchStatus = "";
+
+    private CommunicationHandler(){
+        currentTempStatus = new String[1];
+    }
 
     public static CommunicationHandler getInstance() {
         if(communicationHandler == null) communicationHandler = new CommunicationHandler();
@@ -47,7 +50,8 @@ public class CommunicationHandler {
 
     /* CALLBACK FOR ACTIVITY */
     public interface ICommCallBack {
-        public void callClose();
+        void callClose();
+        void updateActiveUI();
     }
 
     private ICommCallBack callerActivity;
@@ -122,22 +126,23 @@ public class CommunicationHandler {
                             case "relay":
                                 Log.v("Smart Home", "UpdateStatusThread - relay");
                                 currentSwitchStatus = received[1];
-                                System.out.println(received[1]);
+                                if(!lastSwitchStatus.equals(currentSwitchStatus)) {
+                                    lastSwitchStatus = currentSwitchStatus;
+                                    updateSwitchStatusMap();
+                                }
                                 break;
 
                             case "temp":
                                 Log.v("Smart Home", "UpdateStatusThread - temp");
-                                currentTempStatus = received[1];
+                                currentTempStatus[0] = received[1];
                                 break;
                         }
-
+                        callerActivity.updateActiveUI();
                     }
                 } catch (Exception e) {
                     this.exit = true;
-                    currentTempStatus = null;
-                    currentSwitchStatus = null;
                     close();
-                    callerActivity.callClose();
+                    //callerActivity.callClose();
                     e.printStackTrace();
                 }
             }
@@ -145,11 +150,34 @@ public class CommunicationHandler {
         }
     }
 
+    private void updateSwitchStatusMap() {
+        Log.v("SmartHome", "updateSwitches()");
+        String[] status = currentSwitchStatus.split(";");
+        String[] tempString;
+
+        switchNames = new String[status.length];
+        switchStatus = new boolean[status.length];
+
+        for (int i = 0; i < status.length; i++) {
+            tempString = status[i].split(",");
+            switchNames[i] = tempString[0];
+            switchStatus[i] = Boolean.valueOf(tempString[1]);
+        }
+    }
+
+    public String[] getSwitchNames() {
+        return switchNames;
+    }
+
+    public boolean[] getSwitchStatus() {
+        return switchStatus;
+    }
+
     public String getCurrentSwitchStatus() {
         return currentSwitchStatus;
     }
 
-    public String getCurrentTempStatus() {
+    public String[] getCurrentTempStatus() {
         return currentTempStatus;
     }
 }
