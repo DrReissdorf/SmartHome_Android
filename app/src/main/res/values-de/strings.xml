@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Smarthome</string>
+    <string name="action_settings">Einstellungen</string>
+    <string name="addIpButtonText">Hinzufügen</string>
+    <string name="alertEmptyInput_text">Bitte trage eine IP ein.</string>
+    <string name="alertEmptyInput_title">Eingabefeld leer</string>
+    <string name="alertNoServerOnLocalNetwork_text">Es existiert kein Server im LAN.</string>
+    <string name="alertNoServerOnLocalNetwork_title">Keinen Server gefunden</string>
+    <string name="alertServerNotFound_text">Versuche, eine andere IP einzugeben oder starte die automatische Suche.</string>
+    <string name="alertServerNotFound_title">Server nicht gefunden</string>
+    <string name="connectButtonString">Verbinden</string>
+    <string name="findServerButtonString">Finde Server im LAN</string>
+    <string name="goToIpListActivityButton_text">Gespeicherte Server</string>
+    <string name="ipListActivity_alertEmptyInput_text">Mindestens ein Eingabefeld ist leer!</string>
+    <string name="ipListActivity_alertEmptyInput_title">Eingabefeld leer</string>
+    <string name="main_menu_item">Hauptmenü</string>
+    <string name="menu_act_connection_lost_text">Zurück zum Hauptmenü.</string>
+    <string name="menu_act_connection_lost_title">Verbindung verloren</string>
+    <string name="navigation_drawer_close">Navdrawer schließen</string>
+    <string name="navigation_drawer_open">Navdrawer öffnen</string>
+    <string name="notConnectedToWifi_text">Nicht mit einem WLAN Netzwerk verbunden!</string>
+    <string name="notConnectedToWifi_title">Kein WLAN aktiv</string>
+    <string name="relay_item">Steuerbare Relais</string>
+    <string name="serverIpString">Server-IP</string>
+    <string name="title_activity_menu">Steuerbare Relais</string>
+    <string name="temperature_item">Temperatur</string>
+    <string name="wait_find_server_dialog_text">Suche im Netzwerk ...</string>
+    <string name="fragment_main_top_text">Hallöchen</string>
+    <string name="fragment_main_installed_relays_text">Gefundene Relais</string>
+    <string name="fragment_main_installed_temps_text">Gefundene Temperatur-Sensoren</string>
+    <string name="newButtonText">Neu</string>
+</resources>

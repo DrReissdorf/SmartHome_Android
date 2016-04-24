@@ -39,6 +39,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/connectButtonString"
+            android:drawableStart="@drawable/ic_arrow_forward_black_24dp"
             android:id="@+id/connectButton"
             android:layout_weight="0.1"
             android:onClick="connectButtonListener" />
@@ -47,6 +48,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/goToIpListActivityButton_text"
+            android:drawableStart="@drawable/ic_favorite_black_24dp"
             android:id="@+id/ipListActivityButton"
             android:layout_gravity="center_horizontal"
             android:layout_weight="0.1"
@@ -56,6 +58,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/findServerButtonString"
+            android:drawableStart="@drawable/ic_computer_black_24dp"
             android:id="@+id/findServerButton"
             android:layout_weight="0.1"
             android:onClick="findServerButtonListener" />

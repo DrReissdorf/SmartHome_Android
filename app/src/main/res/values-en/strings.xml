@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Smarthome</string>
+    <string name="goToIpListActivityButton_text">Saved servers</string>
+    <string name="ipListActivity_alertEmptyInput_text">At least one inputfield is empty!</string>
+    <string name="ipListActivity_alertEmptyInput_title">Inputfield empty</string>
+    <string name="main_menu_item">Main menu</string>
+    <string name="menu_act_connection_lost_text">Back to main menu</string>
+    <string name="menu_act_connection_lost_title">Lost connection</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="notConnectedToWifi_text">Not connected to wifi</string>
+    <string name="notConnectedToWifi_title">No wifi active</string>
+    <string name="relay_item">Controlable Relays</string>
+    <string name="serverIpString">Server ip</string>
+    <string name="temperature_item">Temperature</string>
+    <string name="title_activity_menu">Controlable Relays</string>
+    <string name="wait_find_server_dialog_text">Searching in network ...</string>
+    <string name="addIpButtonText">Add</string>
+    <string name="alertEmptyInput_text">Please input ip</string>
+    <string name="alertEmptyInput_title">Inputfield empty</string>
+    <string name="alertNoServerOnLocalNetwork_text">There is no server in LAN</string>
+    <string name="alertNoServerOnLocalNetwork_title">No server found</string>
+    <string name="alertServerNotFound_text">Try to enter a different IP or start automatic search.</string>
+    <string name="alertServerNotFound_title">Server not found</string>
+    <string name="connectButtonString">Connect</string>
+    <string name="findServerButtonString">Find server in LAN</string>
+    <string name="action_settings">Settings</string>
+    <string name="fragment_main_top_text">Hello</string>
+    <string name="fragment_main_installed_relays_text">Found relays</string>
+    <string name="fragment_main_installed_temps_text">Found temperature sensors</string>
+    <string name="newButtonText">New</string>
+</resources>

@@ -1,10 +1,15 @@
 package home.sven.smarthome_android.singleton;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.util.Log;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
+import home.sven.smarthome_android.activity.MainActivity;
 import home.sven.smarthome_android.socket.SocketComm;
 
 public class CommunicationHandler {
@@ -13,8 +18,7 @@ public class CommunicationHandler {
     private String currentSwitchStatus;
     private String currentTempStatus;
     private SocketComm commandSocketComm;
-    private final int UPDATE_TEMPERATURE_SLEEP = 2500;
-    private UpdateTemperatureThread updateTemperatureThread;
+    private Context smartHomeContext;
 
     private CommunicationHandler(){}
 
@@ -41,17 +45,24 @@ public class CommunicationHandler {
         return false;
     }
 
+    /* CALLBACK FOR ACTIVITY */
+    public interface ICommCallBack {
+        public void callClose();
+    }
+
+    private ICommCallBack callerActivity;
+
+    public void setCallerActivity(Activity activity) {
+        callerActivity = (ICommCallBack)activity;
+    }
+    /********************************************/
+
     public void startUpdateStatusThread() {
         new UpdateStatusThread().start();
-    }
-    public void startUpdateTemperatureThread() {
-        updateTemperatureThread = new UpdateTemperatureThread();
-        updateTemperatureThread.start();
     }
 
     public boolean close() {
         Log.v("CommunicationHandler", "close()");
-        updateTemperatureThread.exit();
         try {
             return new CloseSocketsTask().execute().get();
         } catch (InterruptedException e) {
@@ -107,8 +118,6 @@ public class CommunicationHandler {
                         String message = commandSocketComm.receive();
                         String[] received = message.split("%");
 
-                        System.out.println("message: "+message);
-
                         switch(received[0]) {
                             case "relay":
                                 Log.v("Smart Home", "UpdateStatusThread - relay");
@@ -123,33 +132,16 @@ public class CommunicationHandler {
                         }
 
                     }
-                    if(currentSwitchStatus == null) exit = true;
-                } catch (IOException e) {
-                    this.exit = true;
-                    close();
-                    e.printStackTrace();
-                }
-            }
-            Log.v("UpdateStatusThread", "stopping...");
-        }
-    }
-
-    private class UpdateTemperatureThread extends Thread {
-        private boolean exit = false;
-        public void run() {
-            while(!exit) {
-                try {
-                    sendCommand("temp%");
-                    sleep(UPDATE_TEMPERATURE_SLEEP);
                 } catch (Exception e) {
+                    this.exit = true;
+                    currentTempStatus = null;
+                    currentSwitchStatus = null;
+                    close();
+                    callerActivity.callClose();
                     e.printStackTrace();
                 }
             }
             Log.v("UpdateStatusThread", "stopping...");
-        }
-
-        public void exit() {
-           this.exit = true;
         }
     }
 

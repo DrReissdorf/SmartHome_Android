@@ -21,11 +21,9 @@ import home.sven.smarthome_android.fragment.RelaisFragment;
 import home.sven.smarthome_android.fragment.TemperatureFragment;
 import home.sven.smarthome_android.singleton.CommunicationHandler;
 
-public class SmartHomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class SmartHomeActivity extends AppCompatActivity implements CommunicationHandler.ICommCallBack,NavigationView.OnNavigationItemSelectedListener {
     private final Context context = this;
     private String serverIP;
-
-    /****************** Threads *********************/
     private CommunicationHandler communicationHandler;
     private RelaisFragment relaisFragment;
 
@@ -38,8 +36,7 @@ public class SmartHomeActivity extends AppCompatActivity implements NavigationVi
         setSupportActionBar(toolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
@@ -71,8 +68,8 @@ public class SmartHomeActivity extends AppCompatActivity implements NavigationVi
 
         if(relaisFragment != null) relaisFragment.startThread();
 
+        communicationHandler.setCallerActivity(this);
         communicationHandler.startUpdateStatusThread();
-        communicationHandler.startUpdateTemperatureThread();
     }
 
     public void onPause() {
@@ -96,7 +93,7 @@ public class SmartHomeActivity extends AppCompatActivity implements NavigationVi
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.activity_smarthome_drawer, menu);
+        getMenuInflater().inflate(R.menu.activity_smarthome_actionmenu, menu);
         return true;
     }
 
@@ -107,9 +104,10 @@ public class SmartHomeActivity extends AppCompatActivity implements NavigationVi
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (id) {
+            case R.id.exit:
+                callClose();
+                break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -150,5 +148,12 @@ public class SmartHomeActivity extends AppCompatActivity implements NavigationVi
     private void switchFragment(int layout, Fragment fragment) {
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction().replace(layout, fragment).commit();
+    }
+
+    @Override
+    public void callClose() {
+        Intent intent = new Intent(context,MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        context.startActivity(intent);
     }
 }

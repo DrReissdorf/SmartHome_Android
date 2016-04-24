@@ -108,10 +108,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void goToIpListActivityButtonListener(View v) {
-       /* Log.v("Relay - Main Activity", "---> Click on " + v.toString() + " Button <--- ");
+        Log.v("Relay - Main Activity", "---> Click on " + v.toString() + " Button <--- ");
         Intent intent = new Intent(context,IpListActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        context.startActivity(intent); */
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        context.startActivity(intent);
     }
 
     public class FindServerTask extends AsyncTask<String, Void, Void> {
