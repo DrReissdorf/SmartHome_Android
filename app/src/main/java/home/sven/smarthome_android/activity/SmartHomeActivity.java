@@ -26,6 +26,9 @@ public class SmartHomeActivity extends AppCompatActivity implements Communicatio
     private String serverIP;
     private CommunicationHandler communicationHandler;
     private Fragment activeFragment;
+    private Fragment mainMenuFragment;
+    private Fragment relaisFragment;
+    private Fragment temperatureFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,30 +49,30 @@ public class SmartHomeActivity extends AppCompatActivity implements Communicatio
         communicationHandler = CommunicationHandler.getInstance();
         serverIP = getIntent().getExtras().getString("ip");
 
+        mainMenuFragment = new MainMenuFragment();
+        relaisFragment = new RelaisFragment();
+        temperatureFragment = new TemperatureFragment();
+
         /***** Set fragment to show *****/
         if(savedInstanceState != null) {
             String savedFragment = savedInstanceState.getString("fragment");
             if(savedFragment != null) {
                 switch(savedFragment) {
                     case "main":
-                        activeFragment = new MainMenuFragment();
-                        switchFragment(activeFragment);
+                        switchFragment(mainMenuFragment);
                         break;
 
                     case "relay":
-                        activeFragment = new RelaisFragment();
-                        switchFragment(activeFragment);
+                        switchFragment(relaisFragment);
                         break;
 
                     case "temp":
-                        activeFragment = new TemperatureFragment();
-                        switchFragment(activeFragment);
+                        switchFragment(temperatureFragment);
                         break;
                 }
             }
         } else {
-            activeFragment = new MainMenuFragment();
-            switchFragment(activeFragment);
+            switchFragment(mainMenuFragment);
         }
     }
 
@@ -156,20 +159,17 @@ public class SmartHomeActivity extends AppCompatActivity implements Communicatio
         switch(id) {
             case R.id.main_menu:
                 Log.v("MainActivity","onNavigationItemSelected() - Clicked Navitem: Main_menu");
-                activeFragment = new MainMenuFragment();
-                switchFragment(activeFragment);
+                switchFragment(mainMenuFragment);
                 break;
 
             case R.id.relais:
                 Log.v("MainActivity","onNavigationItemSelected() - Clicked Navitem: Relais");
-                activeFragment = new RelaisFragment();
-                switchFragment(activeFragment);
+                switchFragment(relaisFragment);
                 break;
 
             case R.id.temp:
                 Log.v("MainActivity","onNavigationItemSelected() - Clicked Navitem: Temp");
-                activeFragment = new TemperatureFragment();
-                switchFragment(activeFragment);
+                switchFragment(temperatureFragment);
                 break;
         }
 
@@ -182,6 +182,7 @@ public class SmartHomeActivity extends AppCompatActivity implements Communicatio
     private void switchFragment(Fragment fragment) {
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit();
+        activeFragment = fragment;
     }
 
     @Override
