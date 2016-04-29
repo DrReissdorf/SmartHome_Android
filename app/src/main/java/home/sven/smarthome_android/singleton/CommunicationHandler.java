@@ -20,6 +20,7 @@ public class CommunicationHandler {
     private boolean[] switchStatus;
     private String currentSwitchStatus;
     private String lastSwitchStatus = "";
+    private UpdateStatusThread updateStatusThread;
 
     private CommunicationHandler(){
         currentTempStatus = new String[1];
@@ -39,6 +40,10 @@ public class CommunicationHandler {
         Log.v("CommunicationHandler", "connect()");
         try {
             boolean ret = new ConnectSocketsTask().execute(ip).get();
+            if(ret) {
+                updateStatusThread = new UpdateStatusThread();
+                updateStatusThread.start();
+            }
             return ret;
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -60,10 +65,6 @@ public class CommunicationHandler {
         callerActivity = (ICommCallBack)activity;
     }
     /********************************************/
-
-    public void startUpdateStatusThread() {
-        new UpdateStatusThread().start();
-    }
 
     public boolean close() {
         Log.v("CommunicationHandler", "close()");
@@ -104,6 +105,10 @@ public class CommunicationHandler {
                 if(commandSocketComm != null) {
                     commandSocketComm.close();
                     commandSocketComm = null;
+                    if(updateStatusThread.isAlive()) {
+                        updateStatusThread.exit();
+                        updateStatusThread = null;
+                    }
                 }
                 return true;
             } catch (IOException e) {
@@ -115,6 +120,7 @@ public class CommunicationHandler {
 
     private class UpdateStatusThread extends Thread {
         private boolean exit = false;
+
         public void run() {
             while(!exit) {
                 try {
@@ -137,16 +143,19 @@ public class CommunicationHandler {
                                 currentTempStatus[0] = received[1];
                                 break;
                         }
-                        callerActivity.updateActiveUI();
+                        if(callerActivity != null) callerActivity.updateActiveUI();
                     }
                 } catch (Exception e) {
                     this.exit = true;
                     close();
-                    //callerActivity.callClose();
                     e.printStackTrace();
                 }
             }
             Log.v("UpdateStatusThread", "stopping...");
+        }
+
+        public void exit() {
+            exit = true;
         }
     }
 

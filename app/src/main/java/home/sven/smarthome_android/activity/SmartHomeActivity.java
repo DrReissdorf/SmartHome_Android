@@ -93,7 +93,6 @@ public class SmartHomeActivity extends AppCompatActivity implements Communicatio
         }
 
         communicationHandler.setCallerActivity(this);
-        communicationHandler.startUpdateStatusThread();
     }
 
     public void onPause() {
