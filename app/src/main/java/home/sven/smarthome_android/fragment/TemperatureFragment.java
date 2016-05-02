@@ -49,7 +49,7 @@ public class TemperatureFragment extends Fragment {
     }
 
     private String getRoundedTemperature(String temp) {
-        float value = Math.round(Float.valueOf(temp)/100);
-        return String.valueOf(value/10);
+        float value = Math.round(Float.valueOf(temp)/1000);
+        return String.valueOf(value);
     }
 }
