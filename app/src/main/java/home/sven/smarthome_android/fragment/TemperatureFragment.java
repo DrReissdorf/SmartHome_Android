@@ -1,23 +1,24 @@
 package home.sven.smarthome_android.fragment;
 
 import android.app.Fragment;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 import home.sven.smarthome_android.R;
-import home.sven.smarthome_android.activity.MainActivity;
 import home.sven.smarthome_android.singleton.CommunicationHandler;
 
 public class TemperatureFragment extends Fragment {
     private CommunicationHandler communicationHandler;
-    private TextView textView0;
-    private Button refreshButton;
+    private ArrayList<TextView> textViews;
+    private LinearLayout linearLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -32,6 +33,9 @@ public class TemperatureFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         Log.v("SmartHome", "onActivityCreated()");
 
+        textViews = new ArrayList<>();
+        linearLayout = (LinearLayout)getView().findViewById(R.id.temperatureLinearLayout);
+
         while(communicationHandler.getCurrentTempStatus() == null) {
             try {
                 Thread.sleep(100);
@@ -44,8 +48,25 @@ public class TemperatureFragment extends Fragment {
     }
 
     public void updateTemperatures(String[] info) {
-        textView0 = (TextView) getView().findViewById(R.id.tempText0);
-        textView0.setText("Temperature: "+getRoundedTemperature(info[0])+"°C");
+        if(textViews != null) {
+            TextView textView;
+
+            while(info.length > textViews.size()) {
+                textView = new TextView(getActivity());
+                textViews.add(textView);
+                linearLayout.addView(textView);
+            }
+
+            while(info.length < textViews.size()) {
+                textView = textViews.get(textViews.size()-1);
+                textViews.remove(textView);
+                linearLayout.removeView(textView);
+            }
+        }
+
+        for(int i=0 ; i<textViews.size() ; i++) {
+            textViews.get(i).setText("  "+getRoundedTemperature(info[i]) + "°C");
+        }
     }
 
     private String getRoundedTemperature(String temp) {

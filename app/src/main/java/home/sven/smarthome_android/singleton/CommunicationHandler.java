@@ -22,9 +22,7 @@ public class CommunicationHandler {
     private String lastSwitchStatus = "";
     private UpdateStatusThread updateStatusThread;
 
-    private CommunicationHandler(){
-        currentTempStatus = new String[1];
-    }
+    private CommunicationHandler(){ }
 
     public static CommunicationHandler getInstance() {
         if(communicationHandler == null) communicationHandler = new CommunicationHandler();
@@ -140,7 +138,7 @@ public class CommunicationHandler {
 
                             case "temp":
                                 Log.v("Smart Home", "UpdateStatusThread - temp");
-                                currentTempStatus[0] = received[1];
+                                currentTempStatus = received[1].split(";");
                                 break;
                         }
                         if(callerActivity != null) callerActivity.updateActiveUI();
