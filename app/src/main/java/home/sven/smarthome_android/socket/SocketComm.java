@@ -19,30 +19,31 @@ public class SocketComm {
     private BufferedReader br;
     private String ip;
     private int port;
-    private final int SOCKET_CONNECT_TIMEOUT = 200;
+    private final int SOCKET_CONNECT_TIMEOUT = 1000;
+    private boolean printDebugLog = false;
 
     public SocketComm(String ip, int port) throws IOException {
-        Log.v("SocketComm", "constructor()");
+        if(printDebugLog) Log.v("SocketComm", "constructor()");
         this.ip = ip;
         this.port = port;
         init();
     }
 
     public void send(String text) throws IOException {
-        Log.v("SocketComm", "send()");
+        if(printDebugLog) Log.v("SocketComm", "send()");
         pw.println(text);
         pw.flush();
     }
 
     public String receive() throws IOException {
-        Log.v("SocketComm", "receive()");
+        if(printDebugLog) Log.v("SocketComm", "receive()");
         String temp;
         temp = br.readLine();
         return temp;
     }
 
     private void init() throws IOException {
-        Log.v("SocketComm", "init()");
+        if(printDebugLog) Log.v("SocketComm", "init()");
         socket = new Socket();
         socket.connect(new InetSocketAddress(ip,port),SOCKET_CONNECT_TIMEOUT);
         pw = new PrintWriter(socket.getOutputStream());
@@ -50,7 +51,7 @@ public class SocketComm {
     }
 
     public void close() throws IOException {
-        Log.v("SocketComm", "close()");
+        if(printDebugLog) Log.v("SocketComm", "close()");
         socket.close();
 
         br = null;

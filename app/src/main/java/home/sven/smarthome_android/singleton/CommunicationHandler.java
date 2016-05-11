@@ -1,19 +1,23 @@
 package home.sven.smarthome_android.singleton;
 
-import android.app.Activity;
 import android.os.AsyncTask;
 import android.util.Log;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
+import home.sven.smarthome_android.interfaces.IMainCallback;
 import home.sven.smarthome_android.socket.SocketComm;
 
 public class CommunicationHandler {
     private static CommunicationHandler communicationHandler;
     private final int TCP_COMMAND_PORT = 18745;
+    private SocketComm socketComm;
 
+    /* TEMPERATURE */
     private String[] currentTempStatus;
-    private SocketComm commandSocketComm;
+
+    /* CALLBACKS */
+    private IMainCallback iMainCallback;
 
     /* SWITCHES */
     private String[] switchNames;
@@ -22,7 +26,9 @@ public class CommunicationHandler {
     private String lastSwitchStatus = "";
     private UpdateStatusThread updateStatusThread;
 
-    private CommunicationHandler(){ }
+    private CommunicationHandler(){
+        currentTempStatus = new String[1];
+    }
 
     public static CommunicationHandler getInstance() {
         if(communicationHandler == null) communicationHandler = new CommunicationHandler();
@@ -31,7 +37,7 @@ public class CommunicationHandler {
 
     public void sendCommand(String message) throws IOException {
         Log.v("CommunicationHandler", "sendCommand()");
-        commandSocketComm.send(message);
+        socketComm.send(message);
     }
 
     public boolean connect(String ip) {
@@ -51,17 +57,11 @@ public class CommunicationHandler {
         return false;
     }
 
-    /* CALLBACK FOR ACTIVITY */
-    public interface ICommCallBack {
-        void callClose();
-        void updateActiveUI();
+
+    public void setMainCallback(IMainCallback iMainCallback) {
+        this.iMainCallback = iMainCallback;
     }
 
-    private ICommCallBack callerActivity;
-
-    public void setCallerActivity(Activity activity) {
-        callerActivity = (ICommCallBack)activity;
-    }
     /********************************************/
 
     public boolean close() {
@@ -80,7 +80,7 @@ public class CommunicationHandler {
         @Override
         protected Boolean doInBackground(String... params) {
             try {
-                if(commandSocketComm == null) commandSocketComm = new SocketComm(params[0], TCP_COMMAND_PORT);
+                if(socketComm == null) socketComm = new SocketComm(params[0], TCP_COMMAND_PORT);
             } catch (IOException e) {
                 e.printStackTrace();
                 return false;
@@ -100,9 +100,9 @@ public class CommunicationHandler {
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
-                if(commandSocketComm != null) {
-                    commandSocketComm.close();
-                    commandSocketComm = null;
+                if(socketComm != null) {
+                    socketComm.close();
+                    socketComm = null;
                     if(updateStatusThread.isAlive()) {
                         updateStatusThread.exit();
                         updateStatusThread = null;
@@ -122,8 +122,8 @@ public class CommunicationHandler {
         public void run() {
             while(!exit) {
                 try {
-                    if(commandSocketComm != null) {
-                        String message = commandSocketComm.receive();
+                    if(socketComm != null) {
+                        String message = socketComm.receive();
                         String[] received = message.split("%");
 
                         switch(received[0]) {
@@ -137,11 +137,13 @@ public class CommunicationHandler {
                                 break;
 
                             case "temp":
-                                Log.v("Smart Home", "UpdateStatusThread - temp");
-                                currentTempStatus = received[1].split(";");
+                                Log.v("Smart Home", "UpdateStatusThread - temp / received: "+received[1]);
+                                currentTempStatus[0] = received[1];
                                 break;
                         }
-                        if(callerActivity != null) callerActivity.updateActiveUI();
+                        if(iMainCallback != null) iMainCallback.updateActiveUI();
+                    } else {
+                        sleep(100);
                     }
                 } catch (Exception e) {
                     this.exit = true;
@@ -186,5 +188,9 @@ public class CommunicationHandler {
 
     public String[] getCurrentTempStatus() {
         return currentTempStatus;
+    }
+
+    public String getConnectedIp() {
+        return socketComm.getIp();
     }
 }

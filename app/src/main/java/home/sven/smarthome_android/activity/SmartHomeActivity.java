@@ -19,9 +19,10 @@ import home.sven.smarthome_android.fragment.MainMenuFragment;
 import home.sven.smarthome_android.R;
 import home.sven.smarthome_android.fragment.RelaisFragment;
 import home.sven.smarthome_android.fragment.TemperatureFragment;
+import home.sven.smarthome_android.interfaces.IMainCallback;
 import home.sven.smarthome_android.singleton.CommunicationHandler;
 
-public class SmartHomeActivity extends AppCompatActivity implements CommunicationHandler.ICommCallBack,NavigationView.OnNavigationItemSelectedListener {
+public class SmartHomeActivity extends AppCompatActivity implements IMainCallback,NavigationView.OnNavigationItemSelectedListener {
     private final Context context = this;
     private String serverIP;
     private CommunicationHandler communicationHandler;
@@ -92,7 +93,7 @@ public class SmartHomeActivity extends AppCompatActivity implements Communicatio
             finish();
         }
 
-        communicationHandler.setCallerActivity(this);
+        communicationHandler.setMainCallback(this);
     }
 
     public void onPause() {
@@ -142,7 +143,7 @@ public class SmartHomeActivity extends AppCompatActivity implements Communicatio
             case R.id.exit:
                 Intent intent = new Intent(context,MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                callClose();
+                close();
                 context.startActivity(intent);
                 break;
         }
@@ -184,8 +185,7 @@ public class SmartHomeActivity extends AppCompatActivity implements Communicatio
         activeFragment = fragment;
     }
 
-    @Override
-    public void callClose() {
+    public void close() {
         Intent intent = new Intent(context,MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         communicationHandler.close();
