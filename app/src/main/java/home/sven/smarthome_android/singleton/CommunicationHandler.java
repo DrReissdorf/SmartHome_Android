@@ -37,7 +37,8 @@ public class CommunicationHandler {
 
     public void sendCommand(String message) throws IOException {
         Log.v("CommunicationHandler", "sendCommand()");
-        socketComm.send(message);
+      //  socketComm.send(message);
+        new sendCommandTask().execute(message);
     }
 
     public boolean connect(String ip) {
@@ -74,6 +75,20 @@ public class CommunicationHandler {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public class sendCommandTask extends AsyncTask<String, Void, Void> {
+        @Override
+        protected Void doInBackground(String... params) {
+            try {
+                socketComm.send(params[0]);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+
+            return null;
+        }
     }
 
     public class ConnectSocketsTask extends AsyncTask<String, Void, Boolean> {
